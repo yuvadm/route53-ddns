@@ -10,14 +10,14 @@ IFS=$'\n\t'
 
 ENDPOINT="route53.amazonaws.com"
 RECORD_TTL=300
-RECORD_NAME=""
+#RECORD_NAME=""
 RECORD_TYPE="A"
 RECORD_VALUE="1.2.3.4"
 HOSTED_ZONE_ID=""
-PATH="/2013-04-01/hostedzone/${HOSTED_ZONE_ID}/rrset/"
+API_PATH="/2013-04-01/hostedzone/${HOSTED_ZONE_ID}/rrset/"
 
-AWS_ACCESS_KEY_ID=''
-AWS_SECRET_ACCESS_KEY=''
+# AWS_ACCESS_KEY_ID=''
+# AWS_SECRET_ACCESS_KEY=''
 AWS_REGION='us-east-1'
 AWS_SERVICE='route53domains'
 
@@ -45,31 +45,32 @@ request_body="
 "
 
 fulldate=$(date -Iseconds)
+shortdate=$(date +%Y%m%d)
 signed_headers="host;z-amx-date"
-canonical_request="POST\n${PATH}\n\nhost:route53.amazon.com\nx-amz-date:${fulldate}\n\n${signed_headers}\n$(hash $request_body)"
+canonical_request="POST\n${PATH}\n\nhost:route53.amazon.com\nx-amz-date:${fulldate}\n\n${signed_headers}\n$(hash "${request_body}")"
 
 hash() {
     msg=$1
-    echo -n $msg | openssl dgst -sha256 | sed 's/^.* //'
+    echo -n "$msg" | openssl dgst -sha256 | sed 's/^.* //'
 }
 
 sign() {
     key=$1
     msg=$2
-    echo -n $msg | openssl dgst -sha256 -hmac $key | sed 's/^.* //'
+    echo -n "$msg" | openssl dgst -sha256 -hmac "$key" | sed 's/^.* //'
 }
 
 getSignatureKey() {
     # usage: getSignatureKey date region service
-    date_key=$(sign AWS4${AWS_SECRET_ACCESS_KEY_ID} $(date +%Y%m%d))
-    region_key=$(sign $date_key $AWS_REGION)
-    service_key=$(sign $region_key $AWS_SERVICE)
-    signing_key=$(sign $service_key aws4_request)
-    echo -n $signing_key
+    date_key=$(sign "AWS4${AWS_SECRET_ACCESS_KEY_ID}" "${shortdate}")
+    region_key=$(sign "$date_key" $AWS_REGION)
+    service_key=$(sign "$region_key" $AWS_SERVICE)
+    signing_key=$(sign "$service_key" aws4_request)
+    echo -n "$signing_key"
 }
 
-credential="{fulldate}\n${date}/${AWS_REGION}/${AWS_SERVICE}/aws4_request"
-sigmsg="AWS4-HMAC-SHA256\n${credential}\n$(hash $(echo -e canonical_request))"
+credential="${shortdate}/${AWS_REGION}/${AWS_SERVICE}/aws4_request"
+sigmsg="AWS4-HMAC-SHA256\n${credential}\n$(hash "$(echo -e canonical_request)")"
 sigkey=$(getSignatureKey)
 signature=$(sign sigkey sigmsg)
 
@@ -80,5 +81,5 @@ curl \
     -H "host:route53.amazonaws.com" \
     -H "x-amz-date:${fulldate}" \
     -H "authorization:${authorization}}" \
-    --data $request_body
-    "https://${ENDPOINT}${PATH}"
+    --data "$request_body" \
+    "https://${ENDPOINT}${API_PATH}"
