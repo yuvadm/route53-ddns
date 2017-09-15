@@ -64,7 +64,7 @@ request_body="<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
 fulldate=$(date --utc +%Y%m%dT%H%M%SZ)
 shortdate=$(date --utc +%Y%m%d)
 signed_headers="host;x-amz-date"
-request_hash=$(hash $request_body)
+request_hash=$(hash "$request_body")
 canonical_request="POST\n${API_PATH}\n\nhost:route53.amazonaws.com\nx-amz-date:${fulldate}\n\n${signed_headers}\n${request_hash}"
 
 date_key=$(sign_plain "AWS4${AWS_SECRET_ACCESS_KEY}" "${shortdate}")
@@ -73,9 +73,9 @@ service_key=$(sign "$region_key" $AWS_SERVICE)
 signing_key=$(sign "$service_key" aws4_request)
 
 credential="${shortdate}/${AWS_REGION}/${AWS_SERVICE}/aws4_request"
-sigmsg="AWS4-HMAC-SHA256\n${fulldate}\n${credential}\n$(hash $canonical_request)"
+sigmsg="AWS4-HMAC-SHA256\n${fulldate}\n${credential}\n$(hash "$canonical_request")"
 
-signature=$(sign $signing_key $sigmsg)
+signature=$(sign "$signing_key" "$sigmsg")
 
 authorization="AWS4-HMAC-SHA256 Credential=${AWS_ACCESS_KEY_ID}/${credential}, SignedHeaders=${signed_headers}, Signature=${signature}"
 
