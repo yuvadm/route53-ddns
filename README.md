@@ -26,3 +26,9 @@ $ ./route53.sh
 ```bash
 $ shellcheck -s ash -e SC2169 route53.sh
 ```
+
+## License
+
+Released under [GPLv3](LICENSE)
+
+Copyright (C) 2017 by Yuval Adam
