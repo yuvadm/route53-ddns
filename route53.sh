@@ -65,12 +65,7 @@ fulldate=$(date --utc +%Y%m%dT%H%M%SZ)
 shortdate=$(date --utc +%Y%m%d)
 signed_headers="host;x-amz-date"
 request_hash=$(hash $request_body)
-canonical_request="POST\n${API_PATH}\n\nhost:route53.amazon.com\nx-amz-date:${fulldate}\n\n${signed_headers}\n${request_hash}"
-
-echo "Canonical request:"
-echo -e $canonical_request
-echo
-echo
+canonical_request="POST\n${API_PATH}\n\nhost:route53.amazonaws.com\nx-amz-date:${fulldate}\n\n${signed_headers}\n${request_hash}"
 
 date_key=$(sign_plain "AWS4${AWS_SECRET_ACCESS_KEY}" "${shortdate}")
 region_key=$(sign "$date_key" $AWS_REGION)
@@ -79,20 +74,16 @@ signing_key=$(sign "$service_key" aws4_request)
 
 credential="${shortdate}/${AWS_REGION}/${AWS_SERVICE}/aws4_request"
 sigmsg="AWS4-HMAC-SHA256\n${fulldate}\n${credential}\n$(hash $canonical_request)"
+
 signature=$(sign $signing_key $sigmsg)
 
 authorization="AWS4-HMAC-SHA256 Credential=${AWS_ACCESS_KEY_ID}/${credential}, SignedHeaders=${signed_headers}, Signature=${signature}"
 
-echo 'Auth'
-echo $authorization
-echo
-echo
-
 curl \
     -X "POST" \
-    -H "host:route53.amazonaws.com" \
-    -H "x-amz-date:${fulldate}" \
-    -H "authorization:${authorization}}" \
-    -H "Content-Type:text/xml;charset=UTF-8" \
+    -H "Host: route53.amazonaws.com" \
+    -H "X-Amz-Date: ${fulldate}" \
+    -H "Authorization: ${authorization}" \
+    -H "Content-Type: text/xml" \
     -d "$request_body" \
     "https://${ENDPOINT}${API_PATH}"
