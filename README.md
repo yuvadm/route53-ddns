@@ -4,6 +4,7 @@ A simple (b)ash script aimed for usage on LEDE/OpenWRT devices which enables sen
 
 ## Requirements
 
+ - [ca-bundle](https://lede-project.org/packages/pkgdata/ca-bundle)
  - [curl](https://lede-project.org/packages/pkgdata/curl)
  - [openssl-util](https://lede-project.org/packages/pkgdata/openssl-util)
 
