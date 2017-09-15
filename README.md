@@ -11,5 +11,18 @@ A simple (b)ash script aimed for usage on LEDE/OpenWRT devices which enables sen
 ## Usage
 
 ```bash
-$ TBD
+$ export HOSTED_ZONE_ID=ABCDEFGHIJKL
+$ export AWS_ACCESS_KEY_ID=AKIAXXXXXXXXXXXX
+$ export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXX
+$ export RECORD_NAME=foo.example.com
+$ export RECORD_VALUE=1.2.3.4
+$ ./route53.sh
+<?xml version="1.0"?>
+<ChangeResourceRecordSetsResponse xmlns="https://route53.amazonaws.com/doc/2013-04-01/"><ChangeInfo><Id>/change/C1R7XXXXXXXX</Id><Status>PENDING</Status><SubmittedAt>2017-09-15T14:03:18.167Z</SubmittedAt></ChangeInfo></ChangeResourceRecordSetsResponse>
+```
+
+## Test
+
+```bash
+$ shellcheck -s ash -e SC2169 route53.sh
 ```

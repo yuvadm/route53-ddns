@@ -3,7 +3,7 @@
 ### route53.sh
 ### For use in LEDE / OpenWRT DDNS scenarios
 ###
-### Requires: curl, openssl-util
+### Requires: ca-bundle, curl, openssl-util
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -12,7 +12,7 @@ ENDPOINT="route53.amazonaws.com"
 RECORD_TTL=300
 #RECORD_NAME=""
 RECORD_TYPE="A"
-RECORD_VALUE="1.2.3.4"
+#RECORD_VALUE=""
 #HOSTED_ZONE_ID=""
 API_PATH="/2013-04-01/hostedzone/${HOSTED_ZONE_ID}/rrset/"
 
