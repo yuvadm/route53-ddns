@@ -10,5 +10,5 @@ addons:
       - shellcheck
 
 script:
-  - shellcheck route53.sh
+  - shellcheck -s ash -e SC2169 route53.sh
 
