@@ -1,6 +1,6 @@
 # route53-ddns
 
-A simple (b)ash script aimed for usage on LEDE/OpenWRT devices which enables sending DDNS updates to Route53
+A simple `{b,d,}ash` script aimed for usage on LEDE/OpenWRT devices which enables sending DDNS updates to Route53
 
 ## Requirements
 
