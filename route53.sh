@@ -13,7 +13,7 @@ RECORD_TTL=300
 #RECORD_NAME=""
 RECORD_TYPE="A"
 RECORD_VALUE="1.2.3.4"
-HOSTED_ZONE_ID=""
+#HOSTED_ZONE_ID=""
 API_PATH="/2013-04-01/hostedzone/${HOSTED_ZONE_ID}/rrset/"
 
 # AWS_ACCESS_KEY_ID=''
@@ -26,10 +26,18 @@ hash() {
     echo -en "$msg" | openssl dgst -sha256 | sed 's/^.* //'
 }
 
-sign() {
+sign_plain() {
+    # Sign message using a plaintext key
     key=$1
     msg=$2
-    echo -en "$msg" | openssl dgst -sha256 -hmac "$key" | sed 's/^.* //'
+    echo -en "$msg" | openssl dgst -hex -sha256 -hmac "$key" | sed 's/^.* //'
+}
+
+sign() {
+    # Sign message using a hex formatted key
+    key=$1
+    msg=$2
+    echo -en "$msg" | openssl dgst -hex -sha256 -mac HMAC -macopt "hexkey:${key}" | sed 's/^.* //'
 }
 
 request_body="<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
@@ -53,7 +61,6 @@ request_body="<?xml version=\"1.0\" encoding=\"UTF-8\"?> \
 </ChangeBatch> \
 </ChangeResourceRecordSetsRequest>"
 
-#fulldate=$(date -Iseconds)
 fulldate=$(date --utc +%Y%m%dT%H%M%SZ)
 shortdate=$(date --utc +%Y%m%d)
 signed_headers="host;x-amz-date"
@@ -65,28 +72,14 @@ echo -e $canonical_request
 echo
 echo
 
-getSignatureKey() {
-    date_key=$(sign "AWS4${AWS_SECRET_ACCESS_KEY}" "${shortdate}")
-    region_key=$(sign "$date_key" $AWS_REGION)
-    service_key=$(sign "$region_key" $AWS_SERVICE)
-    signing_key=$(sign "$service_key" aws4_request)
-    echo -n "$signing_key"
-}
-
-test() {
-    date_key=$(sign "AWS4wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY" "20150830")
-    region_key=$(sign "$date_key" "us-east-1")
-    service_key=$(sign "$region_key" "")
-    signing_key=$(sign "$service_key" aws4_request)
-    echo -n "$signing_key"
-}
+date_key=$(sign_plain "AWS4${AWS_SECRET_ACCESS_KEY}" "${shortdate}")
+region_key=$(sign "$date_key" $AWS_REGION)
+service_key=$(sign "$region_key" $AWS_SERVICE)
+signing_key=$(sign "$service_key" aws4_request)
 
 credential="${shortdate}/${AWS_REGION}/${AWS_SERVICE}/aws4_request"
 sigmsg="AWS4-HMAC-SHA256\n${fulldate}\n${credential}\n$(hash $canonical_request)"
-sigkey=$(getSignatureKey)
-echo $sigkey
-echo $sigmsg
-signature=$(sign $sigkey $sigmsg)
+signature=$(sign $signing_key $sigmsg)
 
 authorization="AWS4-HMAC-SHA256 Credential=${AWS_ACCESS_KEY_ID}/${credential}, SignedHeaders=${signed_headers}, Signature=${signature}"
 
