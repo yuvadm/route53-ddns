@@ -33,6 +33,6 @@ $ shellcheck -s ash -e SC2169 route53.sh
 
 ## License
 
-Released under [GPLv3](LICENSE)
+Released under [GPLv2](LICENSE)
 
 Copyright (C) 2017 by Yuval Adam
