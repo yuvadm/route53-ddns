@@ -6,6 +6,8 @@ A simple `{b,d,}ash` script aimed for usage on LEDE/OpenWRT devices which enable
 
 Attempts to reduce the Route53 REST API call dependencies on the minimum amount of additional packages.
 
+This script has made it [upstream](https://github.com/openwrt/packages/commit/4f8d2053d8e9012fdcab62707e97ac870cb247d0) and can now be used natively with `ddns-scripts`.
+
 ## Requirements
 
  - [ca-bundle](https://lede-project.org/packages/pkgdata/ca-bundle)
